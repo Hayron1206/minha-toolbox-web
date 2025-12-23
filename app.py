@@ -38,12 +38,21 @@ st.markdown("""
 
     /* Forçar cores escuras em textos para evitar "branco no branco" */
     h1, h2, h3, h4, h5, h6 { color: #1E293B !important; font-weight: 700; letter-spacing: -0.02em; }
-    p, li, span, label, div.stMarkdown, .stMarkdown p { color: #334155 !important; }
+    
+    /* Regra Geral para Textos */
+    p, li, span, div.stMarkdown, .stMarkdown p { color: #334155 !important; }
+    
+    /* FORÇA BRUTA: Labels de Inputs (Onde costuma ficar branco) */
+    label, .stTextInput label, .stNumberInput label, .stSelectbox label, .stFileUploader label {
+        color: #1E293B !important;
+        font-weight: 600 !important;
+    }
     
     /* Exceção: Textos dentro de toasts ou notificações de erro/sucesso podem precisar de cor clara.
        Abaixo garantimos que inputs tenham texto escuro. */
     .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
         color: #1E293B !important;
+        background-color: #FFFFFF !important;
     }
 
     /* Fundo Geral com Gradiente Sutil */
@@ -379,9 +388,9 @@ elif st.session_state.page == "QR Code":
     
     with col_config:
         st.markdown("### 1. Configuração")
-        # Container Branco para Configuração
+        # --- CORREÇÃO: Removido container HTML quebrado ---
+        # Agora os campos aparecem limpos e organizados
         with st.container():
-            st.markdown('<div style="background:white; padding:20px; border-radius:10px; border:1px solid #E2E8F0;">', unsafe_allow_html=True)
             texto = st.text_input("Conteúdo (Link ou Texto):", placeholder="https://seu-site.com")
             
             c1, c2 = st.columns(2)
@@ -391,7 +400,6 @@ elif st.session_state.page == "QR Code":
             st.markdown("<br>", unsafe_allow_html=True)
             # Botão de ação explícito
             gerar_btn = st.button("✨ Gerar Código QR", type="primary", use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
         
     with col_preview:
         st.markdown("### 2. Resultado")
