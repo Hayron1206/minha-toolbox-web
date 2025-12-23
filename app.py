@@ -27,9 +27,13 @@ st.markdown("""
     /* Importando fonte Inter */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-    /* Reset e Fonte Geral */
+    /* === RESET GLOBAL E FORÇAR TEMA CLARO === */
     html, body, [class*="css"]  {
         font-family: 'Inter', sans-serif;
+    }
+
+    /* Força a cor do texto principal para cinza escuro para evitar texto branco em fundo branco */
+    h1, h2, h3, h4, h5, h6, p, li, span, div, label {
         color: #2C3E50;
     }
 
@@ -38,7 +42,9 @@ st.markdown("""
         background-color: #F8F9FA;
     }
 
-    /* Banner Hero */
+    /* === ESTILIZAÇÃO ESPECÍFICA === */
+
+    /* Banner Hero (Exceção: Texto Branco) */
     .hero-banner {
         background: linear-gradient(90deg, #4A90E2 0%, #63A4FF 100%);
         padding: 3rem 2rem;
@@ -47,14 +53,16 @@ st.markdown("""
         margin-bottom: 2rem;
         box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
     }
-    .hero-banner h1 {
+    .hero-banner h1, .hero-banner p, .hero-banner span, .hero-banner div {
         color: white !important;
+    }
+    .hero-banner h1 {
         font-size: 2.5rem;
         margin-bottom: 0.5rem;
     }
     .hero-banner p {
         font-size: 1.1rem;
-        opacity: 0.9;
+        opacity: 0.95;
     }
 
     /* Cards do Dashboard */
@@ -63,14 +71,14 @@ st.markdown("""
         padding: 25px;
         border-radius: 12px;
         border: 1px solid #E0E0E0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.04); /* Sombra um pouco mais forte */
         text-align: center;
         height: 100%;
         transition: transform 0.2s;
     }
     .dashboard-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.08);
         border-color: #4A90E2;
     }
     .card-icon {
@@ -86,13 +94,14 @@ st.markdown("""
     }
     .card-title {
         font-weight: 700;
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         margin-bottom: 10px;
         display: block;
+        color: #2C3E50 !important;
     }
     .card-desc {
-        color: #666;
-        font-size: 0.9rem;
+        color: #555555 !important; /* Texto mais escuro para leitura */
+        font-size: 0.95rem;
         margin-bottom: 20px;
         display: block;
     }
@@ -100,10 +109,10 @@ st.markdown("""
     /* Botões Estilizados */
     div.stButton > button {
         background-color: #4A90E2;
-        color: white;
+        color: white !important; /* Força texto branco no botão */
         border-radius: 8px;
         border: none;
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1rem;
         font-weight: 600;
         width: 100%;
         transition: all 0.3s;
@@ -112,24 +121,45 @@ st.markdown("""
         background-color: #357ABD;
         box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
         transform: translateY(-1px);
+        color: white !important;
     }
     
-    /* Input Fields e Uploaders */
-    .stTextInput > div > div > input {
+    /* Input Fields, Text Areas e Uploaders - CORREÇÃO DE LEITURA */
+    .stTextInput input, .stTextArea textarea {
+        color: #2C3E50 !important;
+        background-color: #FFFFFF !important;
+        border: 1px solid #D1D9E6;
         border-radius: 8px;
-        border: 1px solid #E0E0E0;
     }
+    .stSelectbox > div > div {
+        color: #2C3E50 !important;
+        background-color: #FFFFFF !important;
+    }
+    
+    /* Labels dos inputs */
+    .stMarkdown label, p, .stInput > label {
+         color: #2C3E50 !important;
+         font-weight: 500;
+    }
+
+    /* Upload Area */
     .stFileUploader {
         background-color: white;
         padding: 20px;
         border-radius: 12px;
         border: 1px dashed #4A90E2;
     }
+    .stFileUploader small {
+        color: #666 !important;
+    }
 
     /* Sidebar Fix */
     section[data-testid="stSidebar"] {
         background-color: white;
         border-right: 1px solid #E0E0E0;
+    }
+    section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3 {
+        color: #2C3E50 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -160,7 +190,7 @@ with st.sidebar:
         navigate_to("Compressor")
 
     st.markdown("---")
-    st.info("Versão Web 1.0")
+    st.info("Versão Web 1.1 - Visual Otimizado")
 
 # ==============================================================================
 # PÁGINA: DASHBOARD (HOME)
