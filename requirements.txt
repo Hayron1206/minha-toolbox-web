@@ -4,4 +4,4 @@ Pillow
 qrcode
 pymupdf
 xlsxwriter
-openpyxl
+firebase-admin
