@@ -8,6 +8,7 @@ import fitz  # PyMuPDF
 import time
 import zipfile
 import os
+import base64
 
 # --- CONFIGURAÇÃO INICIAL DA PÁGINA ---
 st.set_page_config(
@@ -396,42 +397,53 @@ elif st.session_state.page == "QR Code":
         st.markdown("### 2. Resultado")
         
         # O resultado agora fica dentro de um container nativo para evitar erros de layout
-        with st.container():
-            st.markdown('<div style="background:white; padding:30px; border-radius:10px; border:1px solid #E2E8F0; text-align:center; min-height: 350px; display:flex; flex-direction:column; justify-content:center; align-items:center;">', unsafe_allow_html=True)
-            
-            # Lógica: Gera se clicar no botão OU se já tiver texto e algo mudou
-            if gerar_btn and texto:
-                try:
-                    qr = qrcode.QRCode(box_size=10, border=2)
-                    qr.add_data(texto)
-                    qr.make(fit=True)
-                    img = qr.make_image(fill_color=cor_fill, back_color=cor_back)
-                    
-                    buf = io.BytesIO()
-                    img.save(buf, format="PNG")
-                    byte_im = buf.getvalue()
-                    
-                    # Exibe a imagem centralizada
-                    st.image(byte_im, width=250, caption="Seu QR Code")
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    st.download_button(
-                        label="⬇️ Baixar Imagem (PNG)",
-                        data=byte_im,
-                        file_name="qrcode.png",
-                        mime="image/png",
-                        type="secondary"
-                    )
-                except Exception as e:
-                    st.error(f"Erro ao gerar: {e}")
-            elif not texto:
-                st.markdown('<span style="font-size:3rem; opacity:0.2;">📷</span>', unsafe_allow_html=True)
-                st.caption("Digite o texto e clique em 'Gerar' para ver o resultado.")
-            else:
-                 # Estado inicial ou aguardando clique
-                 st.info("Clique em 'Gerar Código QR' para atualizar.")
-
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Lógica: Gera se clicar no botão OU se já tiver texto e algo mudou
+        if gerar_btn and texto:
+            try:
+                qr = qrcode.QRCode(box_size=10, border=2)
+                qr.add_data(texto)
+                qr.make(fit=True)
+                img = qr.make_image(fill_color=cor_fill, back_color=cor_back)
+                
+                buf = io.BytesIO()
+                img.save(buf, format="PNG")
+                byte_im = buf.getvalue()
+                
+                # Converte para base64 para embutir no HTML
+                b64_img = base64.b64encode(byte_im).decode()
+                
+                # Renderiza o HTML com a imagem DENTRO da div
+                st.markdown(f"""
+                <div style="background:white; padding:30px; border-radius:10px; border:1px solid #E2E8F0; text-align:center; min-height: 350px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                    <img src="data:image/png;base64,{b64_img}" width="250" style="border-radius:4px; margin-bottom:15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <p style="color:#64748B; font-size:0.9rem;">QR Code Gerado com Sucesso!</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Botão de download separado (mas alinhado visualmente)
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.download_button(
+                    label="⬇️ Baixar Imagem (PNG)",
+                    data=byte_im,
+                    file_name="qrcode.png",
+                    mime="image/png",
+                    type="secondary",
+                    use_container_width=True
+                )
+            except Exception as e:
+                st.error(f"Erro ao gerar: {e}")
+                
+        elif not texto:
+            # Estado inicial (Vazio)
+            st.markdown("""
+            <div style="background:white; padding:30px; border-radius:10px; border:1px solid #E2E8F0; text-align:center; min-height: 350px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                <span style="font-size:3rem; opacity:0.2;">📷</span>
+                <p style="color:#94A3B8; margin-top:10px;">Digite o texto e clique em 'Gerar' para ver o resultado.</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            # Aguardando clique
+             st.info("Clique em 'Gerar Código QR' para atualizar.")
 
 # ==============================================================================
 # PÁGINA: UNIR PLANILHAS
@@ -633,6 +645,6 @@ elif st.session_state.page == "Compressor":
 # --- FOOTER ---
 st.markdown("""
     <div class="footer">
-        <p>Desenvolvido com ❤️ Python e Streamlit | Toolbox Pro © 2024</p>
+        <p>Desenvolvido com Python e Streamlit | Toolbox Pro © 2024</p>
     </div>
 """, unsafe_allow_html=True)
