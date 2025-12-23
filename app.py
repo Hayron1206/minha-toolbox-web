@@ -39,8 +39,7 @@ st.markdown("""
     h1, h2, h3, h4, h5, h6 { color: #1E293B !important; font-weight: 700; letter-spacing: -0.02em; }
     p, li, span, label, div.stMarkdown, .stMarkdown p { color: #334155 !important; }
     
-    /* Exceção: Textos dentro de toasts ou notificações de erro/sucesso podem precisar de cor clara, 
-       mas o Streamlit gerencia isso bem se não forçarmos demais. 
+    /* Exceção: Textos dentro de toasts ou notificações de erro/sucesso podem precisar de cor clara.
        Abaixo garantimos que inputs tenham texto escuro. */
     .stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
         color: #1E293B !important;
@@ -96,10 +95,10 @@ st.markdown("""
         box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
         text-align: center;
         transition: all 0.3s ease;
-        height: 320px; /* Altura fixa para alinhar */
+        height: 340px; /* Aumentei a altura para dar respiro */
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* Empurra o botão para baixo */
+        justify-content: space-between;
         position: relative;
         top: 0;
     }
@@ -109,25 +108,30 @@ st.markdown("""
         border-color: #BFDBFE;
     }
     .card-content {
-        flex: 1; /* Ocupa o espaço disponível */
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Alinha conteúdo no topo */
     }
     .card-icon {
         font-size: 48px;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem; /* Mais espaço abaixo do ícone */
         background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
         width: 80px;
         height: 80px;
         line-height: 80px;
         border-radius: 20px;
-        margin: 0 auto 1.5rem auto;
         display: block;
         color: #2563EB;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
     }
-    .card-title { font-weight: 700; font-size: 1.25rem; color: #1E293B !important; margin-bottom: 0.5rem; display: block; }
-    .card-desc { color: #64748B !important; font-size: 0.95rem; line-height: 1.5; margin-bottom: 0; display: block; }
+    .card-title { font-weight: 700; font-size: 1.25rem; color: #1E293B !important; margin-bottom: 0.75rem; display: block; }
+    .card-desc { color: #64748B !important; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; display: block; }
     
-    .card-action {
-        margin-top: 1.5rem; /* Espaço extra antes do botão */
+    /* Botão dentro do card */
+    .dashboard-card button {
+        margin-top: auto;
     }
 
     /* === BOTÕES CUSTOMIZADOS === */
@@ -177,12 +181,11 @@ st.markdown("""
     .stFileUploader small { color: #94A3B8 !important; }
 
     /* === RESULTADOS E BOXES === */
-    .result-box {
-        background: white;
-        padding: 2rem;
-        border-radius: 16px;
+    /* Container Visual Branco */
+    div[data-testid="stVerticalBlock"] > div[style*="background-color"] {
         border: 1px solid #E2E8F0;
-        text-align: center;
+        border-radius: 16px;
+        padding: 20px;
     }
 
     /* === FOOTER === */
@@ -208,13 +211,6 @@ st.markdown("""
     .badge-blue { background-color: #DBEAFE; color: #1E40AF !important; }
     .badge-green { background-color: #DCFCE7; color: #166534 !important; }
     
-    /* Ajuste QR Code */
-    .qr-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 350px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -251,7 +247,7 @@ with st.sidebar:
     <div style="background: #F8FAFC; padding: 1rem; border-radius: 12px; border: 1px solid #E2E8F0;">
         <p style="font-size: 0.8rem; margin-bottom: 0.5rem;"><strong>Status</strong></p>
         <span class="status-badge badge-green">● Online</span>
-        <p style="font-size: 0.7rem; color: #94A3B8; margin-top: 0.5rem;">v1.5.0</p>
+        <p style="font-size: 0.7rem; color: #94A3B8; margin-top: 0.5rem;">v1.6.0 (Fix QR)</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -371,7 +367,7 @@ if st.session_state.page == "Dashboard":
 
 
 # ==============================================================================
-# PÁGINA: QR CODE (CORRIGIDO)
+# PÁGINA: QR CODE (CORRIGIDO E FUNCIONAL)
 # ==============================================================================
 elif st.session_state.page == "QR Code":
     st.markdown("## 📱 Gerador de QR Code")
@@ -382,46 +378,60 @@ elif st.session_state.page == "QR Code":
     
     with col_config:
         st.markdown("### 1. Configuração")
-        st.markdown('<div style="background:white; padding:2rem; border-radius:16px; border:1px solid #E2E8F0;">', unsafe_allow_html=True)
-        texto = st.text_input("Conteúdo (Link ou Texto):", placeholder="https://seu-site.com")
-        
-        c1, c2 = st.columns(2)
-        with c1: cor_fill = st.color_picker("Cor do Código", "#000000")
-        with c2: cor_back = st.color_picker("Cor do Fundo", "#FFFFFF")
-        
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Container Branco para Configuração
+        with st.container():
+            st.markdown('<div style="background:white; padding:20px; border-radius:10px; border:1px solid #E2E8F0;">', unsafe_allow_html=True)
+            texto = st.text_input("Conteúdo (Link ou Texto):", placeholder="https://seu-site.com")
+            
+            c1, c2 = st.columns(2)
+            with c1: cor_fill = st.color_picker("Cor do Código", "#000000")
+            with c2: cor_back = st.color_picker("Cor do Fundo", "#FFFFFF")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            # Botão de ação explícito
+            gerar_btn = st.button("✨ Gerar Código QR", type="primary", use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
     with col_preview:
         st.markdown("### 2. Resultado")
-        # Container CSS para alinhar verticalmente
-        st.markdown('<div class="result-box qr-container">', unsafe_allow_html=True)
         
-        if texto:
-            qr = qrcode.QRCode(box_size=10, border=2)
-            qr.add_data(texto)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color=cor_fill, back_color=cor_back)
+        # O resultado agora fica dentro de um container nativo para evitar erros de layout
+        with st.container():
+            st.markdown('<div style="background:white; padding:30px; border-radius:10px; border:1px solid #E2E8F0; text-align:center; min-height: 350px; display:flex; flex-direction:column; justify-content:center; align-items:center;">', unsafe_allow_html=True)
             
-            buf = io.BytesIO()
-            img.save(buf, format="PNG")
-            byte_im = buf.getvalue()
-            
-            st.image(byte_im, width=250)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.download_button(
-                label="⬇️ Baixar Imagem (PNG)",
-                data=byte_im,
-                file_name="qrcode.png",
-                mime="image/png"
-            )
-        else:
-            st.markdown("<div>", unsafe_allow_html=True)
-            st.markdown('<span style="font-size:3rem; opacity:0.2;">📷</span>', unsafe_allow_html=True)
-            st.caption("Preencha o conteúdo ao lado para visualizar.")
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-        st.markdown("</div>", unsafe_allow_html=True)
+            # Lógica: Gera se clicar no botão OU se já tiver texto e algo mudou
+            if gerar_btn and texto:
+                try:
+                    qr = qrcode.QRCode(box_size=10, border=2)
+                    qr.add_data(texto)
+                    qr.make(fit=True)
+                    img = qr.make_image(fill_color=cor_fill, back_color=cor_back)
+                    
+                    buf = io.BytesIO()
+                    img.save(buf, format="PNG")
+                    byte_im = buf.getvalue()
+                    
+                    # Exibe a imagem centralizada
+                    st.image(byte_im, width=250, caption="Seu QR Code")
+                    
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.download_button(
+                        label="⬇️ Baixar Imagem (PNG)",
+                        data=byte_im,
+                        file_name="qrcode.png",
+                        mime="image/png",
+                        type="secondary"
+                    )
+                except Exception as e:
+                    st.error(f"Erro ao gerar: {e}")
+            elif not texto:
+                st.markdown('<span style="font-size:3rem; opacity:0.2;">📷</span>', unsafe_allow_html=True)
+                st.caption("Digite o texto e clique em 'Gerar' para ver o resultado.")
+            else:
+                 # Estado inicial ou aguardando clique
+                 st.info("Clique em 'Gerar Código QR' para atualizar.")
+
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # ==============================================================================
 # PÁGINA: UNIR PLANILHAS
@@ -623,7 +633,6 @@ elif st.session_state.page == "Compressor":
 # --- FOOTER ---
 st.markdown("""
     <div class="footer">
-        <p>Desenvolvido com Python e Streamlit | Toolbox Pro © 2024</p>
+        <p>Desenvolvido com ❤️ Python e Streamlit | Toolbox Pro © 2024</p>
     </div>
 """, unsafe_allow_html=True)
-
