@@ -514,6 +514,7 @@ elif st.session_state.page == "Compressor":
 # --- FOOTER ---
 st.markdown("""
     <div class="footer">
-        <p>Desenvolvido com ❤️ Python e Streamlit | Toolbox Pro © 2024</p>
+        <p>Desenvolvido por Hayron Rodrigues Neves com Python e Streamlit | Toolbox</p>
     </div>
 """, unsafe_allow_html=True)
+
