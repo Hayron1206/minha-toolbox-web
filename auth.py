@@ -26,6 +26,10 @@ if not firebase_admin._apps:
         st.warning("Dica: Verifique se o arquivo 'firebase_key.json' existe (local) ou se os 'Secrets' estão configurados (nuvem).")
         st.stop()
 
+if "private_key" in cred_dict:
+    cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
+
+
 # Cliente do Banco de Dados Firestore
 db = firestore.client()
 
