@@ -15,17 +15,97 @@ st.set_page_config(
     page_title="Toolbox Pro",
     page_icon="🧰",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed" # Começa colapsado para focar no login
 )
 
-# --- GERENCIAMENTO DE ESTADO (NAVEGAÇÃO) ---
-if 'page' not in st.session_state:
-    st.session_state.page = "Dashboard"
+# --- SISTEMA DE AUTENTICAÇÃO ---
 
-def navigate_to(page_name):
-    st.session_state.page = page_name
+# Usuários permitidos (Em produção, use st.secrets ou banco de dados)
+USUARIOS = {
+    "admin": "1234",  # Usuario: Senha
+    "usuario": "senha_segura"
+}
 
-# --- CSS PERSONALIZADO (DESIGN SYSTEM PREMIUM CORRIGIDO) ---
+def check_login(username, password):
+    """Verifica se o usuário e senha correspondem"""
+    if username in USUARIOS and USUARIOS[username] == password:
+        return True
+    return False
+
+def login_screen():
+    """Renderiza a tela de login"""
+    st.markdown("""
+    <style>
+        .stApp {
+            background-color: #F8FAFC; 
+        }
+        .login-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+            border: 1px solid #E2E8F0;
+        }
+        .login-title {
+            color: #1E293B;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .login-subtitle {
+            color: #64748B;
+            margin-bottom: 2rem;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col2:
+        st.markdown("""
+        <div class="login-box">
+            <div style="font-size: 64px; margin-bottom: 20px;">🧰</div>
+            <h1 class="login-title">Toolbox Pro</h1>
+            <p class="login-subtitle">Faça login para acessar</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Formulário de Login (nativo do Streamlit)
+        with st.form("login_form"):
+            user = st.text_input("Usuário", placeholder="admin")
+            pwd = st.text_input("Senha", type="password", placeholder="••••")
+            submit = st.form_submit_button("Entrar no Sistema", type="primary", use_container_width=True)
+
+        if submit:
+            if check_login(user, pwd):
+                st.session_state['authenticated'] = True
+                st.session_state['user'] = user
+                st.session_state['page'] = "Dashboard"
+                st.rerun()
+            else:
+                st.error("❌ Usuário ou senha incorretos")
+                
+    # Footer do login
+    st.markdown("<div style='text-align:center; margin-top:50px; color:#94A3B8; font-size:0.8rem;'>Toolbox Pro © 2024 • Acesso Restrito</div>", unsafe_allow_html=True)
+
+
+# --- INICIALIZAÇÃO DE ESTADO ---
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
+# --- CONTROLE DE FLUXO ---
+if not st.session_state['authenticated']:
+    login_screen()
+    st.stop() # Para a execução aqui se não estiver logado
+
+# ==============================================================================
+# SE O CÓDIGO CHEGOU AQUI, O USUÁRIO ESTÁ LOGADO
+# ==============================================================================
+
+# --- CSS PERSONALIZADO (DESIGN SYSTEM PREMIUM) ---
 st.markdown("""
 <style>
     /* Importando fonte Inter */
@@ -218,15 +298,27 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- GERENCIAMENTO DE NAVEGAÇÃO INTERNA ---
+if 'page' not in st.session_state:
+    st.session_state.page = "Dashboard"
+
+def navigate_to(page_name):
+    st.session_state.page = page_name
+
+def logout():
+    st.session_state['authenticated'] = False
+    st.session_state['user'] = None
+    st.rerun()
+
 # --- SIDEBAR (MENU LATERAL) ---
 with st.sidebar:
-    st.markdown("""
-    <div style="text-align: center; margin-bottom: 2rem;">
+    st.markdown(f"""
+    <div style="text-align: center; margin-bottom: 1rem;">
         <div style="background: linear-gradient(135deg, #2563EB, #1E40AF); width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);">
             <span style="font-size: 32px;">🧰</span>
         </div>
         <h2 style="margin:0; font-size: 1.25rem;">Toolbox Pro</h2>
-        <p style="margin:0; font-size: 0.8rem; color: #94A3B8; font-weight: 500;">SUITE DE FERRAMENTAS</p>
+        <p style="margin:0; font-size: 0.8rem; color: #94A3B8; font-weight: 500;">Olá, {st.session_state['user']}</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -236,7 +328,6 @@ with st.sidebar:
     st.markdown('<div style="height: 20px;"></div>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; margin-bottom: 0.5rem; letter-spacing: 0.05em;">FERRAMENTAS</p>', unsafe_allow_html=True)
     
-    # Lista de ferramentas atualizada
     if st.button("📱 Gerador QR Code", use_container_width=True): navigate_to("QR Code")
     if st.button("📊 Unir Planilhas", use_container_width=True): navigate_to("Unir Planilhas")
     if st.button("✂️ Divisor Planilhas", use_container_width=True): navigate_to("Divisor Planilhas")
@@ -247,11 +338,15 @@ with st.sidebar:
 
     st.markdown("---")
     
+    # Botão de Logout
+    if st.button("🚪 Sair / Logout", use_container_width=True, type="secondary"):
+        logout()
+    
     st.markdown("""
-    <div style="background: #F8FAFC; padding: 1rem; border-radius: 12px; border: 1px solid #E2E8F0;">
+    <div style="background: #F8FAFC; padding: 1rem; border-radius: 12px; border: 1px solid #E2E8F0; margin-top: 20px;">
         <p style="font-size: 0.8rem; margin-bottom: 0.5rem;"><strong>Status</strong></p>
         <span class="status-badge badge-green">● Online</span>
-        <p style="font-size: 0.7rem; color: #94A3B8; margin-top: 0.5rem;">v1.7.0 (Layout Fix)</p>
+        <p style="font-size: 0.7rem; color: #94A3B8; margin-top: 0.5rem;">v2.0.0 (Login)</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -260,12 +355,12 @@ with st.sidebar:
 # ==============================================================================
 if st.session_state.page == "Dashboard":
     # Banner Hero
-    st.markdown("""
+    st.markdown(f"""
         <div class="hero-banner">
             <div>
-                <span class="status-badge badge-blue" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); margin-bottom: 1rem;">NOVIDADE: NOVAS FERRAMENTAS</span>
-                <h1>Sua caixa de ferramentas,<br>agora na nuvem.</h1>
-                <p>Otimize seu fluxo de trabalho com ferramentas rápidas, seguras e gratuitas.</p>
+                <span class="status-badge badge-blue" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); margin-bottom: 1rem;">ACESSO PERMITIDO</span>
+                <h1>Bem-vindo, {st.session_state['user']}!</h1>
+                <p>Sua caixa de ferramentas segura está pronta para uso.</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
