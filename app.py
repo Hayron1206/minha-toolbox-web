@@ -9,6 +9,7 @@ import time
 import zipfile
 import os
 import base64
+import json
 
 # --- CONFIGURAÇÃO INICIAL DA PÁGINA ---
 st.set_page_config(
@@ -18,22 +19,52 @@ st.set_page_config(
     initial_sidebar_state="collapsed" # Começa colapsado para focar no login
 )
 
-# --- SISTEMA DE AUTENTICAÇÃO ---
+# --- SISTEMA DE AUTENTICAÇÃO SEGURO ---
 
-# Usuários permitidos (Em produção, use st.secrets ou banco de dados)
-USUARIOS = {
-    "admin": "1234",  # Usuario: Senha
-    "usuario": "senha_segura"
-}
+USER_DB_FILE = "users_db.json"
+
+def load_users():
+    """Carrega usuários do arquivo JSON ou cria padrão se não existir"""
+    if not os.path.exists(USER_DB_FILE):
+        # Cria usuário padrão admin/1234 (hash SHA256 de 1234)
+        default_db = {
+            "admin": hashlib.sha256("1234".encode()).hexdigest()
+        }
+        with open(USER_DB_FILE, "w") as f:
+            json.dump(default_db, f)
+        return default_db
+    
+    try:
+        with open(USER_DB_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_user(username, password):
+    """Salva novo usuário com senha hash"""
+    users = load_users()
+    if username in users:
+        return False # Usuário já existe
+    
+    # Hash da senha antes de salvar
+    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+    users[username] = pwd_hash
+    
+    with open(USER_DB_FILE, "w") as f:
+        json.dump(users, f)
+    return True
 
 def check_login(username, password):
-    """Verifica se o usuário e senha correspondem"""
-    if username in USUARIOS and USUARIOS[username] == password:
+    """Verifica se o usuário e senha correspondem (comparando hash)"""
+    users = load_users()
+    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    if username in users and users[username] == pwd_hash:
         return True
     return False
 
 def login_screen():
-    """Renderiza a tela de login"""
+    """Renderiza a tela de login e cadastro"""
     st.markdown("""
     <style>
         .stApp {
@@ -41,7 +72,7 @@ def login_screen():
         }
         .login-box {
             background: white;
-            padding: 3rem;
+            padding: 2rem;
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             max-width: 400px;
@@ -57,7 +88,7 @@ def login_screen():
         }
         .login-subtitle {
             color: #64748B;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -67,27 +98,48 @@ def login_screen():
     with col2:
         st.markdown("""
         <div class="login-box">
-            <div style="font-size: 64px; margin-bottom: 20px;">🧰</div>
+            <div style="font-size: 50px; margin-bottom: 10px;">🧰</div>
             <h1 class="login-title">Toolbox Pro</h1>
-            <p class="login-subtitle">Faça login para acessar</p>
+            <p class="login-subtitle">Acesse sua conta</p>
         </div>
         """, unsafe_allow_html=True)
         
-        # Formulário de Login (nativo do Streamlit)
-        with st.form("login_form"):
-            user = st.text_input("Usuário", placeholder="admin")
-            pwd = st.text_input("Senha", type="password", placeholder="••••")
-            submit = st.form_submit_button("Entrar no Sistema", type="primary", use_container_width=True)
+        # Abas para Alternar entre Login e Cadastro
+        tab_login, tab_signup = st.tabs(["Entrar", "Criar Conta"])
+        
+        with tab_login:
+            with st.form("login_form"):
+                user = st.text_input("Usuário", placeholder="admin")
+                pwd = st.text_input("Senha", type="password", placeholder="••••")
+                submit = st.form_submit_button("Entrar no Sistema", type="primary", use_container_width=True)
 
-        if submit:
-            if check_login(user, pwd):
-                st.session_state['authenticated'] = True
-                st.session_state['user'] = user
-                st.session_state['page'] = "Dashboard"
-                st.rerun()
-            else:
-                st.error("❌ Usuário ou senha incorretos")
+            if submit:
+                if check_login(user, pwd):
+                    st.session_state['authenticated'] = True
+                    st.session_state['user'] = user
+                    st.session_state['page'] = "Dashboard"
+                    st.rerun()
+                else:
+                    st.error("❌ Usuário ou senha incorretos")
+        
+        with tab_signup:
+            with st.form("signup_form"):
+                new_user = st.text_input("Novo Usuário")
+                new_pwd = st.text_input("Nova Senha", type="password")
+                confirm_pwd = st.text_input("Confirmar Senha", type="password")
+                btn_create = st.form_submit_button("Cadastrar", type="secondary", use_container_width=True)
                 
+            if btn_create:
+                if not new_user or not new_pwd:
+                    st.warning("Preencha todos os campos.")
+                elif new_pwd != confirm_pwd:
+                    st.error("As senhas não coincidem.")
+                else:
+                    if save_user(new_user, new_pwd):
+                        st.success("Conta criada! Faça login na aba 'Entrar'.")
+                    else:
+                        st.error("Este usuário já existe.")
+
     # Footer do login
     st.markdown("<div style='text-align:center; margin-top:50px; color:#94A3B8; font-size:0.8rem;'>Toolbox Pro © 2024 • Acesso Restrito</div>", unsafe_allow_html=True)
 
