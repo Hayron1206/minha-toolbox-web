@@ -99,22 +99,21 @@ st.markdown("""
     /* === CARDS FLUTUANTES (DASHBOARD) === */
     .dashboard-card {
         background: white;
-        padding: 2rem;
-        border-radius: 20px;
+        padding: 1.5rem; /* Reduzi um pouco o padding para dar mais espaço */
+        border-radius: 16px;
         border: 1px solid #F1F5F9;
-        box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         text-align: center;
         transition: all 0.3s ease;
-        height: 340px; /* Aumentei a altura para dar respiro */
+        height: 300px; /* Altura fixa ajustada */
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        position: relative;
-        top: 0;
+        margin-bottom: 1rem; /* Espaço extra abaixo do card antes do botão */
     }
     .dashboard-card:hover {
-        top: -8px;
-        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px -5px rgba(0,0,0,0.1);
         border-color: #BFDBFE;
     }
     .card-content {
@@ -122,47 +121,42 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start; /* Alinha conteúdo no topo */
+        justify-content: center;
     }
     .card-icon {
-        font-size: 48px;
-        margin-bottom: 2rem; /* Mais espaço abaixo do ícone */
+        font-size: 42px;
+        margin-bottom: 1rem;
         background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-        width: 80px;
-        height: 80px;
-        line-height: 80px;
-        border-radius: 20px;
+        width: 72px;
+        height: 72px;
+        line-height: 72px;
+        border-radius: 18px;
         display: block;
         color: #2563EB;
-        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
     }
-    .card-title { font-weight: 700; font-size: 1.25rem; color: #1E293B !important; margin-bottom: 0.75rem; display: block; }
-    .card-desc { color: #64748B !important; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; display: block; }
+    .card-title { font-weight: 700; font-size: 1.15rem; color: #1E293B !important; margin-bottom: 0.5rem; display: block; }
+    .card-desc { color: #64748B !important; font-size: 0.9rem; line-height: 1.4; margin-bottom: 0; display: block; }
     
-    /* Botão dentro do card */
-    .dashboard-card button {
-        margin-top: auto;
-    }
-
     /* === BOTÕES CUSTOMIZADOS === */
     div.stButton > button {
         background: linear-gradient(to bottom, #3B82F6, #2563EB);
         color: white !important;
         border: 1px solid #1D4ED8;
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
         font-weight: 600;
-        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
         width: 100%;
         transition: all 0.2s;
+        margin-top: 0px;
     }
     div.stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 8px 12px rgba(37, 99, 235, 0.2);
         filter: brightness(110%);
         color: white !important;
     }
-    div.stButton > button p { color: white !important; } /* Garante texto branco no botão */
+    div.stButton > button p { color: white !important; } 
 
     /* === INPUTS E FORMS === */
     .stTextInput input, .stTextArea textarea, .stSelectbox > div > div {
@@ -257,7 +251,7 @@ with st.sidebar:
     <div style="background: #F8FAFC; padding: 1rem; border-radius: 12px; border: 1px solid #E2E8F0;">
         <p style="font-size: 0.8rem; margin-bottom: 0.5rem;"><strong>Status</strong></p>
         <span class="status-badge badge-green">● Online</span>
-        <p style="font-size: 0.7rem; color: #94A3B8; margin-top: 0.5rem;">v1.6.0 (Fix QR)</p>
+        <p style="font-size: 0.7rem; color: #94A3B8; margin-top: 0.5rem;">v1.7.0 (Layout Fix)</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -276,11 +270,11 @@ if st.session_state.page == "Dashboard":
         </div>
     """, unsafe_allow_html=True)
 
-    # Grid de Cards (Agora com 4 colunas e melhor espaçamento)
+    # Grid de Cards (Usando gap="large" para afastar as colunas)
     st.markdown("### 🚀 Acesso Rápido")
     
     # Linha 1
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4, gap="large")
     with col1:
         st.markdown("""
         <div class="dashboard-card">
@@ -329,7 +323,7 @@ if st.session_state.page == "Dashboard":
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Linha 2
-    col5, col6, col7, col8 = st.columns(4)
+    col5, col6, col7, col8 = st.columns(4, gap="large")
     with col5:
         st.markdown("""
         <div class="dashboard-card">
